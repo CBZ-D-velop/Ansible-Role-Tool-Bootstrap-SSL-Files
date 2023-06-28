@@ -1,0 +1,324 @@
+# Ansible role: tool.bootstrap_ssl_files
+
+![Licence Status](https://img.shields.io/badge/licence-MIT-brightgreen)
+![CI Status](https://img.shields.io/badge/CI-success-brightgreen)
+![Testing Method](https://img.shields.io/badge/Testing%20Method-Ansible%20Molecule-blueviolet)
+![Testing Driver](https://img.shields.io/badge/Testing%20Driver-docker-blueviolet)
+![Language Status](https://img.shields.io/badge/language-Ansible-red)
+![Compagny](https://img.shields.io/badge/Compagny-Labo--CBZ-blue)
+![Author](https://img.shields.io/badge/Author-Lord%20Robin%20Cbz-blue)
+
+## Description
+
+![Tag: Ansible](https://img.shields.io/badge/Tech-Ansible-orange)
+![Tag: Debian](https://img.shields.io/badge/Tech-Debian-orange)
+![Tag: OpenSSL](https://img.shields.io/badge/Tech-OpenSSL-orange)
+![Tag: SSL/TLS](https://img.shields.io/badge/Tech-SSL%2FTLS-orange)
+![Tag: KEY](https://img.shields.io/badge/Tech-KEY-orange)
+![Tag: REQ](https://img.shields.io/badge/Tech-REQ-orange)
+![Tag: CSR](https://img.shields.io/badge/Tech-CSR-orange)
+![Tag: CRT](https://img.shields.io/badge/Tech-CRT-orange)
+![Tag: PEM](https://img.shields.io/badge/Tech-PEM-orange)
+![Tag: CA](https://img.shields.io/badge/Tech-CA-orange)
+
+An Ansible role create a list of defined files related to SSL/TLS
+
+The Certificate Management role automates the creation and organization of certificates, including Certificate Authorities (CAs), root CAs, intermediate CAs, and end certificates. This role simplifies the process of generating certificates and provides a streamlined approach for managing SSL/TLS infrastructure. Key features of this role include:
+
+Certificate Creation: The role generates various types of certificates, including root CAs, intermediate CAs, and end certificates. It allows you to define the desired SSL/TLS information, such as Common Name (CN), Country (C), State (ST), Locality (L), Organization (O), Organizational Unit (OU), and email address.
+
+Certificate Filing: The role organizes the generated certificates into separate components and creates a ZIP archive for each component. This makes it easy to deploy and distribute the certificates to the desired target systems.
+
+Customization Options: The role provides flexibility by allowing you to specify the validity period, key size, and base path for storing the certificate files. You can customize these parameters to meet your specific requirements.
+
+By utilizing the Certificate Management role, you can simplify the creation and management of SSL/TLS certificates, ensure proper organization and filing of certificates, and streamline the deployment process.
+
+## Folder structure
+
+By default Ansible will look in each directory within a role for a main.yml file for relevant content (also man.yml and main):
+
+```PYTHON
+.
+├── README.md  # Contains an overview of the role and its purpose.
+├── defaults
+│   ├── main.yml  # Contains default variables for the role that can be overridden by users.
+│   └── README.md  # Contains documentation for the default variables.
+├── files
+│   └── README.md  # Contains documentation for the files in the directory.
+├── handlers
+│   ├── main.yml  # Contains handlers that can be called by tasks within the role.
+│   └── README.md  # Contains documentation for the handlers.
+├── meta
+│   ├── main.yml  # Contains metadata about the role, including dependencies and supported platforms.
+│   └── README.md  # Contains documentation for the role metadata.
+├── tasks
+│   ├── main.yml  # Contains tasks to be executed by the role on the managed nodes.
+│   └── README.md  # Contains documentation for the tasks.
+├── templates
+│   └── README.md  # Contains documentation for the templates.
+└── vars
+    ├── main.yml  # Contains variables that are specific to the role and are not meant to be overridden.
+    └── README.md  # Contains documentation for the role variables.
+```
+
+## Tests and simulations
+
+### Basics
+
+You have to run multiples tests. *tests with an # are mandatory*
+
+```MARKDOWN
+# lint
+# syntax
+# converge
+# idempotence
+# verify
+side_effect
+```
+
+Executing theses test in this order is called a "scenario" and Molecule can handle them.
+
+Molecule use Ansible and pre configured playbook to create containers, prepare them, converge (run the role) and verify its execution.
+You can manage multiples scenario with multiples tests in order to get a 100% code coverage.
+
+This role contains a ./tests folder. In this folder you can use the inventory or the tower folder to create a simualtion of a real inventory and a real AWX / Tower job execution.
+
+### Command reminder
+
+```SHELL
+# Check your YAML syntax
+yamllint -c ./.yamllint .
+
+# Check your Ansible syntax and code security
+ansible-lint --config=./.ansible-lint .
+
+# Execute and test your role
+molecule lint
+molecule create
+molecule list
+molecule converge
+molecule verify
+molecule destroy
+
+# Execute all previous task in one single command
+molecule test
+```
+
+## Installation
+
+To install this role, just copy/import this role or raw file into your fresh playbook repository or call it with the "include_role/import_role" module.
+
+## Usage
+
+### Vars
+
+Some vars a required to run this role:
+
+```YAML
+---
+# The current user and group to create files
+bootstrap_ssl_user: "root"
+# The base path on where you want your certs files
+bootstrap_ssl_base_path: "/tmp/ssl"
+# The validity of your certs files
+bootstrap_ssl_validity: 365
+# The size of your key
+bootstrap_ssl_key_size: 4096
+# Files wanted and where you want them
+
+# SSL/TLS informations
+bootstrap_ssl_root_ca:
+  cn: "My Local Root CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Root CA"
+  email_address: "contact@your.domain.tld"
+
+bootstrap_ssl_middle_one_ca:
+  cn: "My Local Middle One CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Middle One CA"
+  email_address: "contact@your.domain.tld"
+
+bootstrap_ssl_middle_two_ca:
+  cn: "My Local Middle Two CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Middle One CA"
+  ou: "My Local Middle Two CA"
+  email_address: "contact@your.domain.tld"
+
+bootstrap_ssl_end_certs:
+  - cn: "my-end-certificate-1.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-2.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-3.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+
+```
+
+The best way is to modify these vars by copy the ./default/main.yml file into the ./vars and edit with your personnals requirements.
+
+You can set vars in the template model in Ansible AWX / Tower or just surchage them during the playbook call.
+
+In order to surchage vars, you have multiples possibilities but for mains cases you have to put vars in your inventory and/or on your AWX / Tower interface.
+
+```YAML
+# From inventory
+---
+# The current user and group to create files
+inv_bootstrap_ssl_user: "root"
+# The base path on where you want your certs files
+inv_bootstrap_ssl_base_path: "/tmp/ssl"
+# The validity of your certs files
+inv_bootstrap_ssl_validity: 365
+# The size of your key
+inv_bootstrap_ssl_key_size: 4096
+# Files wanted and where you want them
+
+# SSL/TLS informations
+inv_bootstrap_ssl_root_ca:
+  cn: "My Local Root CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Root CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_middle_one_ca:
+  cn: "My Local Middle One CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Middle One CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_middle_two_ca:
+  cn: "My Local Middle Two CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Middle One CA"
+  ou: "My Local Middle Two CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_end_certs:
+  - cn: "my-end-certificate-1.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-2.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-3.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+
+```
+
+```YAML
+# From AWX / Tower
+---
+
+```
+
+### Run
+
+To run this role, you can copy the molecule/default/converge.yml playbook and add it into your playbook:
+
+```YAML
+- name: "Include tool.bootstrap_ssl_files"
+  tags:
+    - "tool.bootstrap_ssl_files"
+  vars:
+    bootstrap_ssl_user: "{{ inv_bootstrap_ssl_user }}"
+    bootstrap_ssl_base_path: "{{ inv_bootstrap_ssl_base_path }}"
+    bootstrap_ssl_validity: "{{ inv_bootstrap_ssl_validity }}"
+    bootstrap_ssl_key_size: "{{ inv_bootstrap_ssl_key_size }}"
+    bootstrap_ssl_root_ca: "{{ inv_bootstrap_ssl_root_ca }}"
+    bootstrap_ssl_middle_one_ca: "{{ inv_bootstrap_ssl_middle_one_ca }}"
+    bootstrap_ssl_middle_two_ca: "{{ inv_bootstrap_ssl_middle_two_ca }}"
+    bootstrap_ssl_end_certs: "{{ inv_bootstrap_ssl_end_certs }}"
+  ansible.builtin.include_role:
+    name: "tool.bootstrap_ssl_files"
+```
+
+## Architectural Decisions Records
+
+Here you can put your change to keep a trace of your work and decisions.
+
+### 2023-05-04: First Init
+
+* First init of this role with the bootstrap_role playbook by Lord Robin Crombez (see [here](https://youtu.be/T_BbKnzYfP0))
+
+### 2023-04-20: P12 Files
+
+* Now the role can create P12 files, password protected
+* Removed the boolean indicator in order to create a full bundle of file
+* Probably need a CA ? Maybe it will be added ...
+
+### 2023-05-27: CA Authorities and bundle
+
+* Now we can create a CA Authority to sign a cert
+* We can do that with "bootstrap_ssl_ca_name", "bootstrap_ssl_ca" and "bootstrap_ssl_cert" vars
+* "bootstrap_ssl_ca" + "bootstrap_ssl_ca_name" => Create CA
+* "bootstrap_ssl_name" + "bootstrap_ssl_cert" => Create CERT and sign with the CA from "bootstrap_ssl_ca_file"
+* "bootstrap_ssl_cert" just create CERT
+* Role make zip bundles (all files for a CA and for CERT) in a defined location by "bootstrap_ssl_dest"
+
+### 2023-05-30: JKS file
+
+* jks file added
+* jks is convert in pkcs12 format
+
+### 2023-05-30: PKC8 Key file
+
+* file.kcs8.key file added, because some Java apps doesn't work with pkcs12
+
+### 2023-06-28: Open source and refactoring
+
+* Role dont create P12/P8/JKS files, because its a better practise to create desired files directly in the deployment role
+
+## Authors
+
+* Lord Robin Crombez
+
+## Sources
+
+* [Ansible role documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html)
+* [Ansible Molecule documentation](https://molecule.readthedocs.io/)

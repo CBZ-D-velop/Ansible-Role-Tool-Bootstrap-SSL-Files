@@ -1,0 +1,29 @@
+##############################
+#                            #
+# Ansible / Tower managed on #
+#                            #
+##############################
+
+[ req ]
+default_bits={{ bootstrap_ssl_key_size }}
+prompt=no
+req_extensions=req_ext
+distinguished_name=dn
+#
+[ dn ]
+C={{ certificate.c }}
+ST={{ certificate.st }}
+L={{ certificate.l }}
+O={{ certificate.o }}
+OU={{ certificate.ou }}
+emailAddress={{ certificate.email_address }}
+CN={{ certificate.cn }}
+#
+[ req_ext ]
+subjectAltName=@alt_names
+#
+[ alt_names ]
+DNS.1={{ certificate.cn }}
+{% for alternative in certificate.alternatives | default([]) %}
+DNS.{{ loop.index + 1}}={{ alternative }}
+{% endfor %}

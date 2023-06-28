@@ -1,0 +1,61 @@
+---
+# The current user and group to create files
+inv_bootstrap_ssl_user: "root"
+# The base path on where you want your certs files
+inv_bootstrap_ssl_base_path: "/tmp/ssl"
+# The validity of your certs files
+inv_bootstrap_ssl_validity: 365
+# The size of your key
+inv_bootstrap_ssl_key_size: 4096
+# Files wanted and where you want them
+
+# SSL/TLS informations
+inv_bootstrap_ssl_root_ca:
+  cn: "My Local Root CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Root CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_middle_one_ca:
+  cn: "My Local Middle One CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Root CA"
+  ou: "My Local Middle One CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_middle_two_ca:
+  cn: "My Local Middle Two CA"
+  c: "FR"
+  st: "state"
+  l: "city"
+  o: "My Local Middle One CA"
+  ou: "My Local Middle Two CA"
+  email_address: "contact@your.domain.tld"
+
+inv_bootstrap_ssl_end_certs:
+  - cn: "my-end-certificate-1.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-2.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"
+  - cn: "my-end-certificate-3.domain.tld"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "My Local Middle Two CA"
+    ou: "END organization unit"
+    email_address: "contact@your.domain.tld"

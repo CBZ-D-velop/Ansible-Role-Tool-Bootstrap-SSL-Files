@@ -1,0 +1,65 @@
+---
+- name: "create_end_certificate | Check if destination exist for certificate {{ certificate.cn }}"
+  register: certificate_path_stat
+  ansible.builtin.stat:
+    path: "{{ certificate_path }}"
+
+- name: "create_end_certificate | Create bundle ZIP for certificate: {{ certificate.cn }}"
+  when: not certificate_path_stat.stat.exists
+  block:
+    - name: "create_end_certificate | Create the new destination directory for certificate {{ certificate.cn }}"
+      ansible.builtin.file:
+        path: "{{ certificate_path }}/"
+        state: directory
+        recurse: yes
+        owner: "{{ bootstrap_ssl_user }}"
+        group: "{{ bootstrap_ssl_user }}"
+        mode: 0700
+
+    - name: "create_end_certificate | Create a KEY of {{ bootstrap_ssl_key_size }} for certificate {{ certificate.cn }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl genpkey -algorithm RSA -out {{ certificate_filename }}.key -pkeyopt rsa_keygen_bits:{{ bootstrap_ssl_key_size }}"
+
+    - name: "create_end_certificate | Create CSR file"
+      block:
+        - name: "create_end_certificate | Create REQ request template for certificate {{ certificate.cn }}"
+          register: output
+          changed_when: output.size <= 0
+          ansible.builtin.template:
+            src: templates/request.j2
+            dest: "{{ certificate_filename }}.req"
+            owner: "{{ bootstrap_ssl_user }}"
+            group: "{{ bootstrap_ssl_user }}"
+            mode: 0700
+
+        - name: "create_end_certificate | Create CSR with REQ file for certificate {{ certificate.cn }}"
+          register: output
+          changed_when: output.rc != 0
+          ansible.builtin.command: "openssl req -new -key {{ certificate_filename }}.key -config {{ certificate_filename }}.req -out {{ certificate_filename }}.csr  -days {{ bootstrap_ssl_validity }}"
+
+    - name: "create_end_certificate | Sign a CRT for certificate {{ certificate.cn }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl x509 -req -in {{ certificate_filename }}.csr -CA {{ root_middle_two_ca_filename }}.crt -CAkey {{ root_middle_two_ca_filename }}.key -CAcreateserial -out {{ certificate_filename }}.crt"
+
+    - name: "create_end_certificate | Converte the CRT into PEM for certificate {{ certificate.cn }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl x509 -in {{ certificate_filename }}.crt -outform pem -out {{ certificate_filename }}.pem"
+
+    - name: "create_end_certificate | Concatenate KEY with PEM file for certificate {{ certificate.cn }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "openssl rsa -in {{ certificate_filename }}.key -text >> {{ certificate_filename }}.pem"
+
+    - name: "create_end_certificate | Create ZIP bundle for certificate {{ certificate.cn }}"
+      register: output
+      changed_when: output.size <= 0
+      community.general.archive:
+        path: "{{ certificate_path }}"
+        dest: "{{ certificate_path }}.zip"
+        format: zip
+        owner: "{{ bootstrap_ssl_user }}"
+        group: "{{ bootstrap_ssl_user }}"
+        mode: 0700
