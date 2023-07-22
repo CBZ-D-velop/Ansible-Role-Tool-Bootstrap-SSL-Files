@@ -2,12 +2,21 @@
 # The current user and group to create files
 bootstrap_ssl_user: "root"
 # The base path on where you want your certs files
-bootstrap_ssl_base_path: "/tmp/ssl"
+bootstrap_ssl_base_path: "/root/ssl"
 # The validity of your certs files
 bootstrap_ssl_validity: 365
 # The size of your key
 bootstrap_ssl_key_size: 4096
-# Files wanted and where you want them
+
+bootstrap_ssl_serial_start: 1000
+bootstrap_ssl_dirs:
+  - "certs"
+  - "crl"
+  - "newcerts"
+  - "private"
+  - "csr"
+  - "req"
+  - "bundles"
 
 # SSL/TLS informations
 bootstrap_ssl_root_ca:
@@ -18,44 +27,61 @@ bootstrap_ssl_root_ca:
   o: "My Local Root CA"
   ou: "My Local Root CA"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_middle_one_ca:
-  cn: "My Local Middle One CA"
+bootstrap_ssl_intermediate_ca_one:
+  cn: "My Local Intermediate CA One"
   c: "FR"
   st: "state"
   l: "city"
   o: "My Local Root CA"
-  ou: "My Local Middle One CA"
+  ou: "My Local Intermediate CA One"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_middle_two_ca:
-  cn: "My Local Middle Two CA"
+bootstrap_ssl_intermediate_ca_two:
+  cn: "My Local Intermediate CA Two"
   c: "FR"
   st: "state"
   l: "city"
-  o: "My Local Middle One CA"
-  ou: "My Local Middle Two CA"
+  o: "My Local Intermediate CA One"
+  ou: "My Local Intermediate CA Two"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56*ùph5mNY"
 
 bootstrap_ssl_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
+    o: "My Local Intermediate CA Two"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+
   - cn: "my-end-certificate-2.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
+    o: "My Local Intermediate CA Two"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+
   - cn: "my-end-certificate-3.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
+    o: "My Local Intermediate CA Two"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"

@@ -4,6 +4,8 @@
 #                            #
 ##############################
 
+.include {{ intermediate_ca_path }}/openssl.cnf
+
 [ req ]
 default_bits={{ bootstrap_ssl_key_size }}
 prompt=no

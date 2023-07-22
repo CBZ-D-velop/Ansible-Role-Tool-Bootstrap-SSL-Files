@@ -9,6 +9,14 @@ inv_bootstrap_ssl_validity: 365
 inv_bootstrap_ssl_key_size: 4096
 # Files wanted and where you want them
 
+inv_bootstrap_ssl_serial_start: 1000
+inv_bootstrap_ssl_dirs:
+  - "certs"
+  - "crl"
+  - "newcerts"
+  - "private"
+  - "csr"
+
 # SSL/TLS informations
 inv_bootstrap_ssl_root_ca:
   cn: "My Local Root CA"
@@ -18,33 +26,31 @@ inv_bootstrap_ssl_root_ca:
   o: "My Local Root CA"
   ou: "My Local Root CA"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5$%mNY"
 
-inv_bootstrap_ssl_middle_one_ca:
-  cn: "My Local Middle One CA"
+inv_bootstrap_ssl_intermediate_ca:
+  cn: "My Local Intermediate CA"
   c: "FR"
   st: "state"
   l: "city"
   o: "My Local Root CA"
-  ou: "My Local Middle One CA"
+  ou: "My Local Intermediate CA"
   email_address: "contact@your.domain.tld"
-
-inv_bootstrap_ssl_middle_two_ca:
-  cn: "My Local Middle Two CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Middle One CA"
-  ou: "My Local Middle Two CA"
-  email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5m^&NY"
 
 inv_bootstrap_ssl_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
+    o: "My Local Intermediate CA"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+
   - cn: "my-end-certificate-2.domain.tld"
     c: "FR"
     st: "state"
@@ -52,10 +58,19 @@ inv_bootstrap_ssl_end_certs:
     o: "My Local Middle Two CA"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+
   - cn: "my-end-certificate-3.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
+    o: "My Local Intermediate CA"
     ou: "END organization unit"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"

@@ -1,48 +1,68 @@
 ---
+- name: "create_root_ca | Set facts"
+  ansible.builtin.set_fact:
+    root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ bootstrap_ssl_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+
 - name: "create_root_ca | Check if destination exist for ROOT CA"
   register: root_ca_path_stat
   ansible.builtin.stat:
     path: "{{ root_ca_path }}"
 
-- name: "create_root_ca | Create a bundle ZIP for ROOT CA: {{ bootstrap_ssl_root_ca.cn }}"
+- name: "create_root_ca | Create a bundle ZIP for ROOT CA: {{ root_ca_name }}"
   when: not root_ca_path_stat.stat.exists
   block:
-    - name: "create_root_ca | Create the new destination directory"
+    - name: "create_root_ca | Create new destination directories"
+      loop: "{{ bootstrap_ssl_dirs }}"
+      loop_control:
+        loop_var: directory
       ansible.builtin.file:
-        path: "{{ root_ca_path }}/"
+        path: "{{root_ca_path }}/{{ directory }}"
         state: directory
         recurse: yes
         owner: "{{ bootstrap_ssl_user }}"
         group: "{{ bootstrap_ssl_user }}"
-        mode: 0700
+        mode: "0700"
+
+    - name: "create_root_ca | Create index/serial files"
+      loop:
+        - "index.txt"
+        - "serial"
+      loop_control:
+        loop_var: file
+      ansible.builtin.file:
+        path: "{{ root_ca_path }}/{{ file }}"
+        state: touch
+        owner: "{{ bootstrap_ssl_user }}"
+        group: "{{ bootstrap_ssl_user }}"
+        mode: "0700"
+
+    - name: "create_root_ca | Set serial to {{ bootstrap_ssl_serial_start }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "echo {{ bootstrap_ssl_serial_start }} > {{ root_ca_path }}/serial"
+
+    - name: "create_root_ca | Create openssl.cnf conf file"
+      register: output
+      changed_when: output.size <= 0
+      ansible.builtin.template:
+        src: "templates/root_ca_openssl.cnf.j2"
+        dest: "{{ root_ca_path }}/openssl.cnf"
+        owner: "{{ bootstrap_ssl_user }}"
+        group: "{{ bootstrap_ssl_user }}"
+        mode: "0700"
 
     - name: "create_root_ca | Create a KEY of {{ bootstrap_ssl_key_size }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl genpkey -algorithm RSA -out {{ root_ca_filename }}.key -pkeyopt rsa_keygen_bits:{{ bootstrap_ssl_key_size }}"
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ root_ca.password }}' -out {{ root_ca_path }}/private/{{ root_ca_name }}.key.pem {{ bootstrap_ssl_key_size }}"
 
-    - name: "create_root_ca | Create a CSR"
+    - name: "create_root_ca | Create a PEM"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl req -new -key {{ root_ca_filename }}.key -out {{ root_ca_filename }}.csr -subj \"/C={{ bootstrap_ssl_root_ca.c }}/ST={{ bootstrap_ssl_root_ca.st }}/L={{ bootstrap_ssl_root_ca.l }}/O={{ bootstrap_ssl_root_ca.o }}/OU={{ bootstrap_ssl_root_ca.ou }}/emailAddress={{ bootstrap_ssl_root_ca.email_address }}/CN={{ bootstrap_ssl_root_ca.cn }}\" -days {{ bootstrap_ssl_validity }}"
+      ansible.builtin.command: "openssl req -config {{ root_ca_path }}/openssl.cnf -key {{ root_ca_path }}/private/{{ root_ca_name }}.key.pem -new -x509 -days {{ bootstrap_ssl_validity }} -sha256 -extensions v3_ca -out {{ root_ca_path }}/certs/{{ root_ca_name }}.cert.pem -passin pass:'{{ root_ca.password }}' -subj \"/C={{ root_ca.c }}/ST={{ root_ca.st }}/L={{ root_ca.l }}/O={{ root_ca.o }}/OU={{ root_ca.ou }}/emailAddress={{ root_ca.email_address }}/CN={{ root_ca_name }}\""
 
-    - name: "create_root_ca | Sign a CRT"
+    - name: "create_root_ca | Create a ca-chain.pem"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl x509 -req -in {{ root_ca_filename }}.csr -signkey {{ root_ca_filename }}.key -out {{ root_ca_filename }}.crt"
-
-    - name: "create_root_ca | Converte the CRT into PEM"
-      register: output
-      changed_when: output.rc != 0
-      ansible.builtin.command: "openssl x509 -in {{ root_ca_filename }}.crt -outform pem -out {{ root_ca_filename }}.pem"
-
-    - name: "create_root_ca | Create ZIP bundle"
-      register: output
-      changed_when: output.size <= 0
-      community.general.archive:
-        path: "{{ root_ca_path }}"
-        dest: "{{ root_ca_path }}.zip"
-        format: zip
-        owner: "{{ bootstrap_ssl_user }}"
-        group: "{{ bootstrap_ssl_user }}"
-        mode: 0700
+      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/{{ root_ca_name }}.cert.pem > {{ root_ca_path }}/certs/ca-chain.cert.pem"
