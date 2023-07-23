@@ -1,5 +1,14 @@
 ---
+- name: "create_intermediate_ca | Identify the validation CA"
+  ansible.builtin.set_fact:
+    root_ca: "{{ CA }}"
+  when: CA.cn == intermediate_ca.certification_ca
+  loop: "{{ [bootstrap_ssl_root_ca] + bootstrap_ssl_intermediates_ca }}"
+  loop_control:
+    loop_var: CA
+
 - name: "create_intermediate_ca | Set facts"
+  failed_when: not (root_ca | default(false))
   ansible.builtin.set_fact:
     intermediate_ca_name: "{{ intermediate_ca.cn | replace(' ', '-') }}"
     intermediate_ca_path: "{{ bootstrap_ssl_base_path }}/{{ intermediate_ca.cn | replace(' ', '-') }}"
@@ -19,7 +28,7 @@
       loop_control:
         loop_var: directory
       ansible.builtin.file:
-        path: "{{intermediate_ca_path }}/{{ directory }}"
+        path: "{{ intermediate_ca_path }}/{{ directory }}"
         state: directory
         recurse: yes
         owner: "{{ bootstrap_ssl_user }}"
@@ -62,19 +71,19 @@
     - name: "create_intermediate_ca | Create a KEY of {{ bootstrap_ssl_key_size }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ intermediate_ca.password }}' -out {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.key.pem {{ bootstrap_ssl_key_size }}"
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ intermediate_ca.password }}' -out {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key {{ bootstrap_ssl_key_size }}"
 
     - name: "create_intermediate_ca | Create a CSR"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl req -config {{ intermediate_ca_path }}/openssl.cnf -key {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.key.pem -new -sha256 -out {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.csr.pem -passin pass:'{{ intermediate_ca.password }}' -subj \"/C={{ intermediate_ca.c }}/ST={{ intermediate_ca.st }}/L={{ intermediate_ca.l }}/O={{ intermediate_ca.o }}/OU={{ intermediate_ca.ou }}/emailAddress={{ intermediate_ca.email_address }}/CN={{ intermediate_ca_name }}\""
+      ansible.builtin.command: "openssl req -config {{ intermediate_ca_path }}/openssl.cnf -key {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key -new -sha256 -out {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -passin pass:'{{ intermediate_ca.password }}' -subj \"/C={{ intermediate_ca.c }}/ST={{ intermediate_ca.st }}/L={{ intermediate_ca.l }}/O={{ intermediate_ca.o }}/OU={{ intermediate_ca.ou }}/emailAddress={{ intermediate_ca.email_address }}/CN={{ intermediate_ca_name }}\""
 
     - name: "create_intermediate_ca | Create a CRT (sign CSR)"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl ca -config {{ root_ca_path }}/openssl.cnf -extensions v3_intermediate_ca -days {{ bootstrap_ssl_validity }} -notext -md sha256 -in {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.csr.pem -out {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.cert.pem -passin pass:'{{ bootstrap_ssl_root_ca.password }}' -batch"
+      ansible.builtin.command: "openssl ca -config {{ root_ca_path }}/openssl.cnf -extensions v3_intermediate_ca -days {{ bootstrap_ssl_ca_validity }} -notext -md sha256 -in {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -out {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt -passin pass:'{{ bootstrap_ssl_root_ca.password }}' -batch"
 
-    - name: "create_root_ca | Create a ca-chain.pem"
+    - name: "create_intermediate_ca | Create a ca-chain.pem.crt"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/ca-chain.cert.pem {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.cert.pem > {{ intermediate_ca_path }}/certs/ca-chain.cert.pem"
+      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/ca-chain.pem.crt {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt > {{ intermediate_ca_path }}/certs/ca-chain.pem.crt"

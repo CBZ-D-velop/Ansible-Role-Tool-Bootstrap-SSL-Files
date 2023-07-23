@@ -17,7 +17,7 @@
       loop_control:
         loop_var: directory
       ansible.builtin.file:
-        path: "{{root_ca_path }}/{{ directory }}"
+        path: "{{ root_ca_path }}/{{ directory }}"
         state: directory
         recurse: yes
         owner: "{{ bootstrap_ssl_user }}"
@@ -55,14 +55,14 @@
     - name: "create_root_ca | Create a KEY of {{ bootstrap_ssl_key_size }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ root_ca.password }}' -out {{ root_ca_path }}/private/{{ root_ca_name }}.key.pem {{ bootstrap_ssl_key_size }}"
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ root_ca.password }}' -out {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key {{ bootstrap_ssl_key_size }}"
 
     - name: "create_root_ca | Create a PEM"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl req -config {{ root_ca_path }}/openssl.cnf -key {{ root_ca_path }}/private/{{ root_ca_name }}.key.pem -new -x509 -days {{ bootstrap_ssl_validity }} -sha256 -extensions v3_ca -out {{ root_ca_path }}/certs/{{ root_ca_name }}.cert.pem -passin pass:'{{ root_ca.password }}' -subj \"/C={{ root_ca.c }}/ST={{ root_ca.st }}/L={{ root_ca.l }}/O={{ root_ca.o }}/OU={{ root_ca.ou }}/emailAddress={{ root_ca.email_address }}/CN={{ root_ca_name }}\""
+      ansible.builtin.command: "openssl req -config {{ root_ca_path }}/openssl.cnf -key {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key -new -x509 -days {{ bootstrap_ssl_ca_validity }} -sha256 -extensions v3_ca -out {{ root_ca_path }}/certs/{{ root_ca_name }}.pem.crt -passin pass:'{{ root_ca.password }}' -subj \"/C={{ root_ca.c }}/ST={{ root_ca.st }}/L={{ root_ca.l }}/O={{ root_ca.o }}/OU={{ root_ca.ou }}/emailAddress={{ root_ca.email_address }}/CN={{ root_ca_name }}\""
 
-    - name: "create_root_ca | Create a ca-chain.pem"
+    - name: "create_root_ca | Create a ca-chain.pem.crt"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/{{ root_ca_name }}.cert.pem > {{ root_ca_path }}/certs/ca-chain.cert.pem"
+      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/{{ root_ca_name }}.pem.crt > {{ root_ca_path }}/certs/ca-chain.pem.crt"

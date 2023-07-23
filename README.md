@@ -119,63 +119,94 @@ Some vars a required to run this role:
 # The current user and group to create files
 bootstrap_ssl_user: "root"
 # The base path on where you want your certs files
-bootstrap_ssl_base_path: "/tmp/ssl"
+bootstrap_ssl_base_path: "/root/ssl"
 # The validity of your certs files
-bootstrap_ssl_validity: 365
+bootstrap_ssl_ca_validity: 3650
+bootstrap_ssl_cert_validity: 365
 # The size of your key
 bootstrap_ssl_key_size: 4096
-# Files wanted and where you want them
+
+bootstrap_ssl_serial_start: 1000
+bootstrap_ssl_dirs:
+  - "certs"
+  - "crl"
+  - "newcerts"
+  - "private"
+  - "csr"
+  - "req"
+  - "bundles"
 
 # SSL/TLS informations
 bootstrap_ssl_root_ca:
-  cn: "My Local Root CA"
+  cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
   l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Root CA"
+  o: "Local Ansible"
+  ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_middle_one_ca:
-  cn: "My Local Middle One CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Middle One CA"
-  email_address: "contact@your.domain.tld"
+bootstrap_ssl_intermediates_ca:
+  - cn: "My Local Ansible Intermediate CA 1"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 1"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56h5mNY"
+    certification_ca: "My Local Ansible Root CA"
 
-bootstrap_ssl_middle_two_ca:
-  cn: "My Local Middle Two CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Middle One CA"
-  ou: "My Local Middle Two CA"
-  email_address: "contact@your.domain.tld"
+  - cn: "My Local Ansible Intermediate CA 2"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 2"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56*ùph5mNY"
+    certification_ca: "My Local Ansible Intermediate CA 1"
 
 bootstrap_ssl_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 1"
+
   - cn: "my-end-certificate-2.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "My Local Intermediate CA Two"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"
+
   - cn: "my-end-certificate-3.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"
 
 ```
 
@@ -186,68 +217,89 @@ You can set vars in the template model in Ansible AWX / Tower or just surchage t
 In order to surchage vars, you have multiples possibilities but for mains cases you have to put vars in your inventory and/or on your AWX / Tower interface.
 
 ```YAML
-# From inventory
 ---
 # The current user and group to create files
 inv_bootstrap_ssl_user: "root"
 # The base path on where you want your certs files
-inv_bootstrap_ssl_base_path: "/tmp/ssl"
+inv_bootstrap_ssl_base_path: "/tmp/ssl/MyPKI"
 # The validity of your certs files
-inv_bootstrap_ssl_validity: 365
+inv_bootstrap_ssl_ca_validity: 3650
+inv_bootstrap_ssl_cert_validity: 90
 # The size of your key
 inv_bootstrap_ssl_key_size: 4096
 # Files wanted and where you want them
 
 # SSL/TLS informations
 inv_bootstrap_ssl_root_ca:
-  cn: "My Local Root CA"
+  cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
   l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Root CA"
+  o: "Local Ansible"
+  ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5mNY"
 
-inv_bootstrap_ssl_middle_one_ca:
-  cn: "My Local Middle One CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Middle One CA"
-  email_address: "contact@your.domain.tld"
+inv_bootstrap_ssl_intermediates_ca:
+  - cn: "My Local Ansible Intermediate CA 1"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 1"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56h5mNY"
+    certification_ca: "My Local Ansible Root CA"
 
-inv_bootstrap_ssl_middle_two_ca:
-  cn: "My Local Middle Two CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Middle One CA"
-  ou: "My Local Middle Two CA"
-  email_address: "contact@your.domain.tld"
+  - cn: "My Local Ansible Intermediate CA 2"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 2"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56*ùph5mNY"
+    certification_ca: "My Local Ansible Intermediate CA 1"
 
 inv_bootstrap_ssl_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 1"
+
   - cn: "my-end-certificate-2.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "My Local Intermediate CA Two"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"
+
   - cn: "my-end-certificate-3.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"
 
 ```
 
@@ -268,12 +320,12 @@ To run this role, you can copy the molecule/default/converge.yml playbook and ad
   vars:
     bootstrap_ssl_user: "{{ inv_bootstrap_ssl_user }}"
     bootstrap_ssl_base_path: "{{ inv_bootstrap_ssl_base_path }}"
-    bootstrap_ssl_validity: "{{ inv_bootstrap_ssl_validity }}"
+    bootstrap_ssl_ca_validity: "{{ inv_bootstrap_ssl_ca_validity }}"
     bootstrap_ssl_key_size: "{{ inv_bootstrap_ssl_key_size }}"
     bootstrap_ssl_root_ca: "{{ inv_bootstrap_ssl_root_ca }}"
-    bootstrap_ssl_middle_one_ca: "{{ inv_bootstrap_ssl_middle_one_ca }}"
-    bootstrap_ssl_middle_two_ca: "{{ inv_bootstrap_ssl_middle_two_ca }}"
+    bootstrap_ssl_intermediates_ca: "{{ inv_bootstrap_ssl_intermediates_ca }}"
     bootstrap_ssl_end_certs: "{{ inv_bootstrap_ssl_end_certs }}"
+    bootstrap_ssl_cert_validity: "{{ inv_bootstrap_ssl_cert_validity }}"
   ansible.builtin.include_role:
     name: "tool.bootstrap_ssl_files"
 ```
@@ -317,6 +369,15 @@ Here you can put your change to keep a trace of your work and decisions.
 ## Authors
 
 * Lord Robin Crombez
+
+### 2023-07-23: CA chains reworked, BREAKING CHANGES
+
+* You can now define a totally custom PKI plateform
+* You can create multile intermediaite CA with the level that you want (999 deep lenght max)
+* Certificates can have any level of CA validation (ROOT, CA 1, CA 2 etc)
+* CAs keys are password protected
+* To deploy a cert, you have the ca-chain.pem.crt, that contains all cert of the structure for that cert
+* Revocation system not implemented
 
 ## Sources
 

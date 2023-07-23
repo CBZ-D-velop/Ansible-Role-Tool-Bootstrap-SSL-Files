@@ -15,11 +15,11 @@
       vars:
         bootstrap_ssl_user: "{{ inv_bootstrap_ssl_user }}"
         bootstrap_ssl_base_path: "{{ inv_bootstrap_ssl_base_path }}"
-        bootstrap_ssl_validity: "{{ inv_bootstrap_ssl_validity }}"
+        bootstrap_ssl_ca_validity: "{{ inv_bootstrap_ssl_ca_validity }}"
         bootstrap_ssl_key_size: "{{ inv_bootstrap_ssl_key_size }}"
         bootstrap_ssl_root_ca: "{{ inv_bootstrap_ssl_root_ca }}"
-        bootstrap_ssl_middle_one_ca: "{{ inv_bootstrap_ssl_middle_one_ca }}"
-        bootstrap_ssl_middle_two_ca: "{{ inv_bootstrap_ssl_middle_two_ca }}"
+        bootstrap_ssl_intermediates_ca: "{{ inv_bootstrap_ssl_intermediates_ca }}"
         bootstrap_ssl_end_certs: "{{ inv_bootstrap_ssl_end_certs }}"
+        bootstrap_ssl_cert_validity: "{{ inv_bootstrap_ssl_cert_validity }}"
       ansible.builtin.include_role:
         name: "tool.bootstrap_ssl_files"
