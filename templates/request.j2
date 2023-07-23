@@ -4,8 +4,10 @@
 #                            #
 ##############################
 
+.include {{ root_ca_path }}/openssl.cnf
+
 [ req ]
-default_bits={{ bootstrap_ssl_key_size }}
+default_bits={{ bootstrap_ssl_files_key_size }}
 prompt=no
 req_extensions=req_ext
 distinguished_name=dn

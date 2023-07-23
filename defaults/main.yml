@@ -1,61 +1,92 @@
 ---
 # The current user and group to create files
-bootstrap_ssl_user: "root"
+bootstrap_ssl_files_user: "root"
 # The base path on where you want your certs files
-bootstrap_ssl_base_path: "/tmp/ssl"
+bootstrap_ssl_files_base_path: "/root/ssl"
 # The validity of your certs files
-bootstrap_ssl_validity: 365
+bootstrap_ssl_files_ca_validity: 3650
+bootstrap_ssl_files_cert_validity: 365
 # The size of your key
-bootstrap_ssl_key_size: 4096
-# Files wanted and where you want them
+bootstrap_ssl_files_key_size: 4096
+
+bootstrap_ssl_files_serial_start: 1000
+bootstrap_ssl_files_dirs:
+  - "certs"
+  - "crl"
+  - "newcerts"
+  - "private"
+  - "csr"
+  - "req"
+  - "bundles"
 
 # SSL/TLS informations
-bootstrap_ssl_root_ca:
-  cn: "My Local Root CA"
+bootstrap_ssl_files_root_ca:
+  cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
   l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Root CA"
+  o: "Local Ansible"
+  ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
+  password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_middle_one_ca:
-  cn: "My Local Middle One CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Root CA"
-  ou: "My Local Middle One CA"
-  email_address: "contact@your.domain.tld"
+bootstrap_ssl_files_intermediates_ca:
+  - cn: "My Local Ansible Intermediate CA 1"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 1"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56h5mNY"
+    certification_ca: "My Local Ansible Root CA"
 
-bootstrap_ssl_middle_two_ca:
-  cn: "My Local Middle Two CA"
-  c: "FR"
-  st: "state"
-  l: "city"
-  o: "My Local Middle One CA"
-  ou: "My Local Middle Two CA"
-  email_address: "contact@your.domain.tld"
+  - cn: "My Local Ansible Intermediate CA 2"
+    c: "FR"
+    st: "state"
+    l: "city"
+    o: "Local Ansible"
+    ou: "My Local Ansible Intermediate CA 2"
+    email_address: "contact@your.domain.tld"
+    password: "m3EH3A56*ùph5mNY"
+    certification_ca: "My Local Ansible Intermediate CA 1"
 
-bootstrap_ssl_end_certs:
+bootstrap_ssl_files_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 1"
+
   - cn: "my-end-certificate-2.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "My Local Intermediate CA Two"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"
+
   - cn: "my-end-certificate-3.domain.tld"
     c: "FR"
     st: "state"
     l: "city"
-    o: "My Local Middle Two CA"
-    ou: "END organization unit"
+    o: "Local Ansible"
+    ou: "Local Dev IT"
     email_address: "contact@your.domain.tld"
+    alternatives:
+      - "127.0.0.1"
+      - "localhost"
+      - "my-website.tld"
+    certification_ca: "My Local Ansible Intermediate CA 2"

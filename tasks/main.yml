@@ -2,39 +2,22 @@
 - name: "Bootsrap SSL/TLS files"
   run_once: true
   block:
-    - name: "Create CA ROOT Authority"
+    - name: "Create ROOT CA Authority"
       vars:
-        root_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
-        root_ca_filename: "{{ root_ca_path }}/{{ bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
+        root_ca: "{{ bootstrap_ssl_files_root_ca }}"
       ansible.builtin.include_tasks:
         file: "create_root_ca.yml"
 
-    - name: "Create MIDDLE ONE CA"
-      vars:
-        root_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
-        root_ca_filename: "{{ root_ca_path }}/{{ bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
-        root_middle_one_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
-        root_middle_one_ca_filename: "{{ root_middle_one_ca_path }}/{{ bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
+    - name: "Create INTERMEDIATE CA Authorities"
+      loop: "{{ bootstrap_ssl_files_intermediates_ca }}"
+      loop_control:
+        loop_var: intermediate_ca
       ansible.builtin.include_tasks:
-        file: "create_middle_one_ca.yml"
+        file: "create_intermediate_ca.yml"
 
-    - name: "Create MIDDLE TWO CA"
-      vars:
-        root_middle_one_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
-        root_middle_one_ca_filename: "{{ root_middle_one_ca_path }}/{{ bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
-        root_middle_two_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-        root_middle_two_ca_filename: "{{ root_middle_two_ca_path }}/{{ bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-      ansible.builtin.include_tasks:
-        file: "create_middle_two_ca.yml"
-
-    - name: "Create Certificates"
-      loop: "{{ bootstrap_ssl_end_certs }}"
+    - name: "Create certificates"
+      loop: "{{ bootstrap_ssl_files_end_certs }}"
       loop_control:
         loop_var: certificate
-      vars:
-        root_middle_two_ca_path: "{{ bootstrap_ssl_base_path }}/{{ bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-        root_middle_two_ca_filename: "{{ root_middle_two_ca_path }}/{{ bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-        certificate_path: "{{ bootstrap_ssl_base_path }}/{{ certificate.cn | replace(' ', '-') }}"
-        certificate_filename: "{{ certificate_path }}/{{ certificate.cn | replace(' ', '-') }}"
       ansible.builtin.include_tasks:
         file: "create_end_certificate.yml"

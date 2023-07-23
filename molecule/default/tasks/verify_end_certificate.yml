@@ -1,0 +1,37 @@
+---
+- name: "verify_end_certificate | Identify the validation CA"
+  ansible.builtin.set_fact:
+    root_ca: "{{ CA }}"
+  when: CA.cn == certificate.certification_ca
+  loop: "{{ [inv_bootstrap_ssl_files_root_ca] + inv_bootstrap_ssl_files_intermediates_ca }}"
+  loop_control:
+    loop_var: CA
+
+- name: "verify_end_certificate | Set facts"
+  failed_when: not (root_ca | default(false))
+  ansible.builtin.set_fact:
+    root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+    certificate_name: "{{ certificate.cn | replace(' ', '-') }}"
+    cert_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/{{ certificate.cn | replace(' ', '-') }}.pem.crt"
+    key_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/private/{{ certificate.cn | replace(' ', '-') }}.pem.key"
+    req_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/req/{{ certificate.cn | replace(' ', '-') }}.req"
+    csr_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/csr/{{ certificate.cn | replace(' ', '-') }}.pem.csr"
+    ca_chains_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/ca-chain.pem.crt"
+    bundle_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/bundles/{{ certificate.cn | replace(' ', '-') }}"
+
+- name: "verify_end_certificate | Verify end certificate ca-chain.pem.crt for {{ certificate.cn }}"
+  register: output
+  changed_when: output.rc != 0
+  ansible.builtin.command: "openssl verify -CAfile {{ ca_chains_path }} {{ ca_chains_path }}"
+
+- name: "verify_end_certificate | Verify end certificate CRT for {{ certificate.cn }}"
+  register: output
+  changed_when: output.rc != 0
+  ansible.builtin.command: "openssl verify -CAfile {{ ca_chains_path }} {{ cert_path }}"
+
+- name: "verify_end_certificate | Check ZIP bundle for {{ certificate.cn }}"
+  register: bundle_path_stat
+  failed_when: not bundle_path_stat.stat.exists
+  ansible.builtin.stat:
+    path: "{{ bundle_path }}.zip"

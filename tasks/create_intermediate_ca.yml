@@ -1,0 +1,89 @@
+---
+- name: "create_intermediate_ca | Identify the validation CA"
+  ansible.builtin.set_fact:
+    root_ca: "{{ CA }}"
+  when: CA.cn == intermediate_ca.certification_ca
+  loop: "{{ [bootstrap_ssl_files_root_ca] + bootstrap_ssl_files_intermediates_ca }}"
+  loop_control:
+    loop_var: CA
+
+- name: "create_intermediate_ca | Set facts"
+  failed_when: not (root_ca | default(false))
+  ansible.builtin.set_fact:
+    intermediate_ca_name: "{{ intermediate_ca.cn | replace(' ', '-') }}"
+    intermediate_ca_path: "{{ bootstrap_ssl_files_base_path }}/{{ intermediate_ca.cn | replace(' ', '-') }}"
+    root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+  
+- name: "create_intermediate_ca | Check if destination exist for INTERMEDIATE CA"
+  register: intermediate_ca_path_stat
+  ansible.builtin.stat:
+    path: "{{ intermediate_ca_path }}"
+
+- name: "create_intermediate_ca | Create a bundle ZIP for INTERMEDIATE CA: {{ intermediate_ca_name }}"
+  when: not intermediate_ca_path_stat.stat.exists
+  block:
+    - name: "create_intermediate_ca | Create new destination directories"
+      loop: "{{ bootstrap_ssl_files_dirs }}"
+      loop_control:
+        loop_var: directory
+      ansible.builtin.file:
+        path: "{{ intermediate_ca_path }}/{{ directory }}"
+        state: directory
+        recurse: yes
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
+        mode: "0700"
+
+    - name: "create_intermediate_ca | Create index/serial files"
+      loop:
+        - "index.txt"
+        - "serial"
+      loop_control:
+        loop_var: file
+      ansible.builtin.file:
+        path: "{{ intermediate_ca_path }}/{{ file }}"
+        state: touch
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
+        mode: "0700"
+
+    - name: "create_intermediate_ca | Set serial to {{ bootstrap_ssl_files_root_ca_serial_start }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "echo {{ bootstrap_ssl_files_serial_start }} > {{ intermediate_ca_path }}/serial"
+
+    - name: "create_intermediate_ca | Set crlnumber to {{ bootstrap_ssl_files_root_ca_serial_start }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "echo {{ bootstrap_ssl_files_serial_start }} > {{ intermediate_ca_path }}/crlnumber"
+
+    - name: "create_intermediate_ca | Create openssl.cnf conf file"
+      register: output
+      changed_when: output.size <= 0
+      ansible.builtin.template:
+        src: "templates/intermediate_ca_openssl.cnf.j2"
+        dest: "{{ intermediate_ca_path }}/openssl.cnf"
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
+        mode: "0700"
+
+    - name: "create_intermediate_ca | Create a KEY of {{ bootstrap_ssl_files_key_size }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ intermediate_ca.password }}' -out {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key {{ bootstrap_ssl_files_key_size }}"
+
+    - name: "create_intermediate_ca | Create a CSR"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl req -config {{ intermediate_ca_path }}/openssl.cnf -key {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key -new -sha256 -out {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -passin pass:'{{ intermediate_ca.password }}' -subj \"/C={{ intermediate_ca.c }}/ST={{ intermediate_ca.st }}/L={{ intermediate_ca.l }}/O={{ intermediate_ca.o }}/OU={{ intermediate_ca.ou }}/emailAddress={{ intermediate_ca.email_address }}/CN={{ intermediate_ca_name }}\""
+
+    - name: "create_intermediate_ca | Create a CRT (sign CSR)"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl ca -config {{ root_ca_path }}/openssl.cnf -extensions v3_intermediate_ca -days {{ bootstrap_ssl_files_ca_validity }} -notext -md sha256 -in {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -out {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt -passin pass:'{{ bootstrap_ssl_files_root_ca.password }}' -batch"
+
+    - name: "create_intermediate_ca | Create a ca-chain.pem.crt"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "cat {{ root_ca_path }}/certs/ca-chain.pem.crt {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt > {{ intermediate_ca_path }}/certs/ca-chain.pem.crt"

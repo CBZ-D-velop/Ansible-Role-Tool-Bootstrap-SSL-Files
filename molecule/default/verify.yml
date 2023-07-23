@@ -6,108 +6,28 @@
   gather_facts: false
   tasks:
 
-    - name: "Verify SSL files for ROOT CA: {{ inv_bootstrap_ssl_root_ca.cn }}"
-      vars:
-        root_ca_path: "{{ inv_bootstrap_ssl_base_path }}/{{ inv_bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
-        root_ca_filename: "{{ root_ca_path }}/{{ inv_bootstrap_ssl_root_ca.cn | replace(' ', '-') }}"
-      block:
-        - name: "Verify CRT file for ROOT CA: {{ inv_bootstrap_ssl_root_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_ca_filename }}.crt -text"
+  - name: "Verify Root CA"
+    block:
+    - name: "Set facts"
+      ansible.builtin.set_fact:
+        root_ca_name: "{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
+        root_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
 
-        - name: "Verify PEM file for ROOT CA: {{ inv_bootstrap_ssl_root_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_ca_filename }}.pem -text"
+    - name: "Verify"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl verify -CAfile {{ root_ca_path }}/certs/ca-chain.pem.crt {{ root_ca_path }}/certs/ca-chain.pem.crt"
 
-        - name: "Verify ZIP bundle for ROOT CA: {{ inv_bootstrap_ssl_root_ca.cn }}"
-          register: folder_check
-          failed_when: not folder_check.stat.exists
-          ansible.builtin.stat:
-            path: "{{ root_ca_path }}.zip"
+  - name: "Verify Intermediate CA"
+    loop: "{{ inv_bootstrap_ssl_files_intermediates_ca }}"
+    loop_control:
+      loop_var: intermediate_ca
+    ansible.builtin.include_tasks:
+      file: "tasks/verify_intermediate_ca.yml"
 
-    - name: "Verify SSL files for MIDDLE ONE CA: {{ inv_bootstrap_ssl_middle_one_ca.cn }}"
-      vars:
-        root_middle_one_ca_path: "{{ inv_bootstrap_ssl_base_path }}/{{ inv_bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
-        root_middle_one_ca_filename: "{{ root_middle_one_ca_path }}/{{ inv_bootstrap_ssl_middle_one_ca.cn | replace(' ', '-') }}"
-      block:
-        - name: "Verify CRT file for MIDDLE ONE CA: {{ inv_bootstrap_ssl_middle_one_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_middle_one_ca_filename }}.crt -text"
-
-        - name: "Verify PEM file for MIDDLE ONE CA: {{ inv_bootstrap_ssl_middle_one_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_middle_one_ca_filename }}.pem -text"
-
-        - name: "Verify ZIP bundle for MIDDLE ONE CA: {{ inv_bootstrap_ssl_middle_one_ca.cn }}"
-          register: folder_check
-          failed_when: not folder_check.stat.exists
-          ansible.builtin.stat:
-            path: "{{ root_middle_one_ca_path }}.zip"
-
-    - name: "Verify SSL files for MIDDLE TWO CA: {{ inv_bootstrap_ssl_middle_two_ca.cn }}"
-      vars:
-        root_middle_one_ca_path: "{{ inv_bootstrap_ssl_base_path }}/{{ inv_bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-        root_middle_one_ca_filename: "{{ root_middle_one_ca_path }}/{{ inv_bootstrap_ssl_middle_two_ca.cn | replace(' ', '-') }}"
-      block:
-        - name: "Verify CRT file for MIDDLE TWO CA: {{ inv_bootstrap_ssl_middle_two_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_middle_one_ca_filename }}.crt -text"
-
-        - name: "Verify PEM file for MIDDLE TWO CA: {{ inv_bootstrap_ssl_middle_two_ca.cn }}"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          ansible.builtin.command: "openssl x509 -noout -in {{ root_middle_one_ca_filename }}.pem -text"
-
-        - name: "Verify ZIP bundle for MIDDLE TWO CA: {{ inv_bootstrap_ssl_middle_two_ca.cn }}"
-          register: folder_check
-          failed_when: not folder_check.stat.exists
-          ansible.builtin.stat:
-            path: "{{ root_middle_one_ca_path }}.zip"
-
-    - name: "Verify SSL files for Certificates"
-      block:
-        - name: "Verify CRT file file for Certificates"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          loop: "{{ inv_bootstrap_ssl_end_certs }}"
-          loop_control:
-            loop_var: certificate
-          vars:
-            path: "{{ inv_bootstrap_ssl_base_path }}/{{ certificate.cn | replace(' ', '-') }}"
-            filename: "{{ path }}/{{ certificate.cn | replace(' ', '-') }}"
-          ansible.builtin.command: "openssl x509 -noout -in {{ filename }}.crt -text"
-
-        - name: "Verify PEM file for Certificates"
-          register: verification
-          failed_when: verification.rc != 0
-          changed_when: verification.rc != 0
-          loop: "{{ inv_bootstrap_ssl_end_certs }}"
-          loop_control:
-            loop_var: certificate
-          vars:
-            path: "{{ inv_bootstrap_ssl_base_path }}/{{ certificate.cn | replace(' ', '-') }}"
-            filename: "{{ path }}/{{ certificate.cn | replace(' ', '-') }}"
-          ansible.builtin.command: "openssl x509 -noout -in {{ filename }}.pem -text"
-
-        - name: "Verify ZIP bundle for Certificates"
-          register: folder_check
-          failed_when: not folder_check.stat.exists
-          loop: "{{ inv_bootstrap_ssl_end_certs }}"
-          loop_control:
-            loop_var: certificate
-          vars:
-            path: "{{ inv_bootstrap_ssl_base_path }}/{{ certificate.cn | replace(' ', '-') }}"
-          ansible.builtin.stat:
-            path: "{{ path }}.zip"
+  - name: "Verify Intermediate CA"
+    loop: "{{ inv_bootstrap_ssl_files_end_certs }}"
+    loop_control:
+      loop_var: certificate
+    ansible.builtin.include_tasks:
+      file: "tasks/verify_end_certificate.yml"
