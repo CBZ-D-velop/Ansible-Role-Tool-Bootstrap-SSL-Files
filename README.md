@@ -366,10 +366,6 @@ Here you can put your change to keep a trace of your work and decisions.
 
 * Role dont create P12/P8/JKS files, because its a better practise to create desired files directly in the deployment role
 
-## Authors
-
-* Lord Robin Crombez
-
 ### 2023-07-23: CA chains reworked, BREAKING CHANGES
 
 * You can now define a totally custom PKI plateform
@@ -378,6 +374,10 @@ Here you can put your change to keep a trace of your work and decisions.
 * CAs keys are password protected
 * To deploy a cert, you have the ca-chain.pem.crt, that contains all cert of the structure for that cert
 * Revocation system not implemented
+
+## Authors
+
+* Lord Robin Crombez
 
 ## Sources
 
