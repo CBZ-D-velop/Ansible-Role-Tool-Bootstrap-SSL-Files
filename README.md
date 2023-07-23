@@ -1,4 +1,4 @@
-# Ansible role: tool.bootstrap_ssl_files
+# Ansible role: tool.bootstrap_ssl_files_files
 
 ![Licence Status](https://img.shields.io/badge/licence-MIT-brightgreen)
 ![CI Status](https://img.shields.io/badge/CI-success-brightgreen)
@@ -117,17 +117,17 @@ Some vars a required to run this role:
 ```YAML
 ---
 # The current user and group to create files
-bootstrap_ssl_user: "root"
+bootstrap_ssl_files_user: "root"
 # The base path on where you want your certs files
-bootstrap_ssl_base_path: "/root/ssl"
+bootstrap_ssl_files_base_path: "/root/ssl"
 # The validity of your certs files
-bootstrap_ssl_ca_validity: 3650
-bootstrap_ssl_cert_validity: 365
+bootstrap_ssl_files_ca_validity: 3650
+bootstrap_ssl_files_cert_validity: 365
 # The size of your key
-bootstrap_ssl_key_size: 4096
+bootstrap_ssl_files_key_size: 4096
 
-bootstrap_ssl_serial_start: 1000
-bootstrap_ssl_dirs:
+bootstrap_ssl_files_serial_start: 1000
+bootstrap_ssl_files_dirs:
   - "certs"
   - "crl"
   - "newcerts"
@@ -137,7 +137,7 @@ bootstrap_ssl_dirs:
   - "bundles"
 
 # SSL/TLS informations
-bootstrap_ssl_root_ca:
+bootstrap_ssl_files_root_ca:
   cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
@@ -147,7 +147,7 @@ bootstrap_ssl_root_ca:
   email_address: "contact@your.domain.tld"
   password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_intermediates_ca:
+bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
     c: "FR"
     st: "state"
@@ -168,7 +168,7 @@ bootstrap_ssl_intermediates_ca:
     password: "m3EH3A56*ùph5mNY"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
-bootstrap_ssl_end_certs:
+bootstrap_ssl_files_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
@@ -219,18 +219,18 @@ In order to surchage vars, you have multiples possibilities but for mains cases 
 ```YAML
 ---
 # The current user and group to create files
-inv_bootstrap_ssl_user: "root"
+inv_bootstrap_ssl_files_user: "root"
 # The base path on where you want your certs files
-inv_bootstrap_ssl_base_path: "/tmp/ssl/MyPKI"
+inv_bootstrap_ssl_files_base_path: "/tmp/ssl/MyPKI"
 # The validity of your certs files
-inv_bootstrap_ssl_ca_validity: 3650
-inv_bootstrap_ssl_cert_validity: 90
+inv_bootstrap_ssl_files_ca_validity: 3650
+inv_bootstrap_ssl_files_cert_validity: 90
 # The size of your key
-inv_bootstrap_ssl_key_size: 4096
+inv_bootstrap_ssl_files_key_size: 4096
 # Files wanted and where you want them
 
 # SSL/TLS informations
-inv_bootstrap_ssl_root_ca:
+inv_bootstrap_ssl_files_root_ca:
   cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
@@ -240,7 +240,7 @@ inv_bootstrap_ssl_root_ca:
   email_address: "contact@your.domain.tld"
   password: "m3EH3A56h5mNY"
 
-inv_bootstrap_ssl_intermediates_ca:
+inv_bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
     c: "FR"
     st: "state"
@@ -261,7 +261,7 @@ inv_bootstrap_ssl_intermediates_ca:
     password: "m3EH3A56*ùph5mNY"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
-inv_bootstrap_ssl_end_certs:
+inv_bootstrap_ssl_files_end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"
@@ -314,20 +314,20 @@ inv_bootstrap_ssl_end_certs:
 To run this role, you can copy the molecule/default/converge.yml playbook and add it into your playbook:
 
 ```YAML
-- name: "Include tool.bootstrap_ssl_files"
+- name: "Include tool.bootstrap_ssl_files_files"
   tags:
-    - "tool.bootstrap_ssl_files"
+    - "tool.bootstrap_ssl_files_files"
   vars:
-    bootstrap_ssl_user: "{{ inv_bootstrap_ssl_user }}"
-    bootstrap_ssl_base_path: "{{ inv_bootstrap_ssl_base_path }}"
-    bootstrap_ssl_ca_validity: "{{ inv_bootstrap_ssl_ca_validity }}"
-    bootstrap_ssl_key_size: "{{ inv_bootstrap_ssl_key_size }}"
-    bootstrap_ssl_root_ca: "{{ inv_bootstrap_ssl_root_ca }}"
-    bootstrap_ssl_intermediates_ca: "{{ inv_bootstrap_ssl_intermediates_ca }}"
-    bootstrap_ssl_end_certs: "{{ inv_bootstrap_ssl_end_certs }}"
-    bootstrap_ssl_cert_validity: "{{ inv_bootstrap_ssl_cert_validity }}"
+    bootstrap_ssl_files_user: "{{ inv_bootstrap_ssl_files_user }}"
+    bootstrap_ssl_files_base_path: "{{ inv_bootstrap_ssl_files_base_path }}"
+    bootstrap_ssl_files_ca_validity: "{{ inv_bootstrap_ssl_files_ca_validity }}"
+    bootstrap_ssl_files_key_size: "{{ inv_bootstrap_ssl_files_key_size }}"
+    bootstrap_ssl_files_root_ca: "{{ inv_bootstrap_ssl_files_root_ca }}"
+    bootstrap_ssl_files_intermediates_ca: "{{ inv_bootstrap_ssl_files_intermediates_ca }}"
+    bootstrap_ssl_files_end_certs: "{{ inv_bootstrap_ssl_files_end_certs }}"
+    bootstrap_ssl_files_cert_validity: "{{ inv_bootstrap_ssl_files_cert_validity }}"
   ansible.builtin.include_role:
-    name: "tool.bootstrap_ssl_files"
+    name: "tool.bootstrap_ssl_files_files"
 ```
 
 ## Architectural Decisions Records
@@ -347,11 +347,11 @@ Here you can put your change to keep a trace of your work and decisions.
 ### 2023-05-27: CA Authorities and bundle
 
 * Now we can create a CA Authority to sign a cert
-* We can do that with "bootstrap_ssl_ca_name", "bootstrap_ssl_ca" and "bootstrap_ssl_cert" vars
-* "bootstrap_ssl_ca" + "bootstrap_ssl_ca_name" => Create CA
-* "bootstrap_ssl_name" + "bootstrap_ssl_cert" => Create CERT and sign with the CA from "bootstrap_ssl_ca_file"
-* "bootstrap_ssl_cert" just create CERT
-* Role make zip bundles (all files for a CA and for CERT) in a defined location by "bootstrap_ssl_dest"
+* We can do that with "bootstrap_ssl_files_ca_name", "bootstrap_ssl_files_ca" and "bootstrap_ssl_files_cert" vars
+* "bootstrap_ssl_files_ca" + "bootstrap_ssl_files_ca_name" => Create CA
+* "bootstrap_ssl_files_name" + "bootstrap_ssl_files_cert" => Create CERT and sign with the CA from "bootstrap_ssl_files_ca_file"
+* "bootstrap_ssl_files_cert" just create CERT
+* Role make zip bundles (all files for a CA and for CERT) in a defined location by "bootstrap_ssl_files_dest"
 
 ### 2023-05-30: JKS file
 

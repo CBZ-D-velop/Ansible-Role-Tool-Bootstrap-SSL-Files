@@ -2,7 +2,7 @@
 - name: "create_root_ca | Set facts"
   ansible.builtin.set_fact:
     root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
-    root_ca_path: "{{ bootstrap_ssl_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
 
 - name: "create_root_ca | Check if destination exist for ROOT CA"
   register: root_ca_path_stat
@@ -13,15 +13,15 @@
   when: not root_ca_path_stat.stat.exists
   block:
     - name: "create_root_ca | Create new destination directories"
-      loop: "{{ bootstrap_ssl_dirs }}"
+      loop: "{{ bootstrap_ssl_files_dirs }}"
       loop_control:
         loop_var: directory
       ansible.builtin.file:
         path: "{{ root_ca_path }}/{{ directory }}"
         state: directory
         recurse: yes
-        owner: "{{ bootstrap_ssl_user }}"
-        group: "{{ bootstrap_ssl_user }}"
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
         mode: "0700"
 
     - name: "create_root_ca | Create index/serial files"
@@ -33,14 +33,14 @@
       ansible.builtin.file:
         path: "{{ root_ca_path }}/{{ file }}"
         state: touch
-        owner: "{{ bootstrap_ssl_user }}"
-        group: "{{ bootstrap_ssl_user }}"
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
         mode: "0700"
 
-    - name: "create_root_ca | Set serial to {{ bootstrap_ssl_serial_start }}"
+    - name: "create_root_ca | Set serial to {{ bootstrap_ssl_files_serial_start }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "echo {{ bootstrap_ssl_serial_start }} > {{ root_ca_path }}/serial"
+      ansible.builtin.shell: "echo {{ bootstrap_ssl_files_serial_start }} > {{ root_ca_path }}/serial"
 
     - name: "create_root_ca | Create openssl.cnf conf file"
       register: output
@@ -48,19 +48,19 @@
       ansible.builtin.template:
         src: "templates/root_ca_openssl.cnf.j2"
         dest: "{{ root_ca_path }}/openssl.cnf"
-        owner: "{{ bootstrap_ssl_user }}"
-        group: "{{ bootstrap_ssl_user }}"
+        owner: "{{ bootstrap_ssl_files_user }}"
+        group: "{{ bootstrap_ssl_files_user }}"
         mode: "0700"
 
-    - name: "create_root_ca | Create a KEY of {{ bootstrap_ssl_key_size }}"
+    - name: "create_root_ca | Create a KEY of {{ bootstrap_ssl_files_key_size }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ root_ca.password }}' -out {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key {{ bootstrap_ssl_key_size }}"
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ root_ca.password }}' -out {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key {{ bootstrap_ssl_files_key_size }}"
 
     - name: "create_root_ca | Create a PEM"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl req -config {{ root_ca_path }}/openssl.cnf -key {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key -new -x509 -days {{ bootstrap_ssl_ca_validity }} -sha256 -extensions v3_ca -out {{ root_ca_path }}/certs/{{ root_ca_name }}.pem.crt -passin pass:'{{ root_ca.password }}' -subj \"/C={{ root_ca.c }}/ST={{ root_ca.st }}/L={{ root_ca.l }}/O={{ root_ca.o }}/OU={{ root_ca.ou }}/emailAddress={{ root_ca.email_address }}/CN={{ root_ca_name }}\""
+      ansible.builtin.command: "openssl req -config {{ root_ca_path }}/openssl.cnf -key {{ root_ca_path }}/private/{{ root_ca_name }}.pem.key -new -x509 -days {{ bootstrap_ssl_files_ca_validity }} -sha256 -extensions v3_ca -out {{ root_ca_path }}/certs/{{ root_ca_name }}.pem.crt -passin pass:'{{ root_ca.password }}' -subj \"/C={{ root_ca.c }}/ST={{ root_ca.st }}/L={{ root_ca.l }}/O={{ root_ca.o }}/OU={{ root_ca.ou }}/emailAddress={{ root_ca.email_address }}/CN={{ root_ca_name }}\""
 
     - name: "create_root_ca | Create a ca-chain.pem.crt"
       register: output
