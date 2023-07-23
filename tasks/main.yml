@@ -15,13 +15,6 @@
       ansible.builtin.include_tasks:
         file: "create_intermediate_ca.yml"
 
-    #- name: "Create INTERMEDIATE CA Two Authority"
-    #  vars:
-    #    root_ca: "{{ bootstrap_ssl_files_intermediate_ca_one }}"
-    #    intermediate_ca: "{{ bootstrap_ssl_files_intermediate_ca_two }}"
-    #  ansible.builtin.include_tasks:
-    #    file: "create_intermediate_ca.yml"
-
     - name: "Create certificates"
       loop: "{{ bootstrap_ssl_files_end_certs }}"
       loop_control:

@@ -5,3 +5,29 @@
   hosts: "all"
   gather_facts: false
   tasks:
+
+  - name: "Verify Root CA"
+    block:
+    - name: "Set facts"
+      ansible.builtin.set_fact:
+        root_ca_name: "{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
+        root_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
+
+    - name: "Verify"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl verify -CAfile {{ root_ca_path }}/certs/ca-chain.pem.crt {{ root_ca_path }}/certs/ca-chain.pem.crt"
+
+  - name: "Verify Intermediate CA"
+    loop: "{{ inv_bootstrap_ssl_files_intermediates_ca }}"
+    loop_control:
+      loop_var: intermediate_ca
+    ansible.builtin.include_tasks:
+      file: "tasks/verify_intermediate_ca.yml"
+
+  - name: "Verify Intermediate CA"
+    loop: "{{ inv_bootstrap_ssl_files_end_certs }}"
+    loop_control:
+      loop_var: certificate
+    ansible.builtin.include_tasks:
+      file: "tasks/verify_end_certificate.yml"

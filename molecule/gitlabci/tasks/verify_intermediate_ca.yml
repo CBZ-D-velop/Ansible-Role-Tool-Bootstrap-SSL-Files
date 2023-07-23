@@ -1,0 +1,21 @@
+---
+- name: "verify_intermediate_ca | Identify the validation CA"
+  ansible.builtin.set_fact:
+    root_ca: "{{ CA }}"
+  when: CA.cn == intermediate_ca.certification_ca
+  loop: "{{ [inv_bootstrap_ssl_files_root_ca] + inv_bootstrap_ssl_files_intermediates_ca }}"
+  loop_control:
+    loop_var: CA
+
+- name: "verify_intermediate_ca | Set facts"
+  failed_when: not (root_ca | default(false))
+  ansible.builtin.set_fact:
+    intermediate_ca_name: "{{ intermediate_ca.cn | replace(' ', '-') }}"
+    intermediate_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ intermediate_ca.cn | replace(' ', '-') }}"
+    root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+
+- name: "verify_intermediate_ca | Verify Intermediate CA {{ intermediate_ca_name }}"
+  register: output
+  changed_when: output.rc != 0
+  ansible.builtin.command: "openssl verify -CAfile {{ intermediate_ca_path }}/certs/ca-chain.pem.crt {{ intermediate_ca_path }}/certs/ca-chain.pem.crt"
