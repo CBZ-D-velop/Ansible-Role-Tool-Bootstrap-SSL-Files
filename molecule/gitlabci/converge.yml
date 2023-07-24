@@ -9,9 +9,9 @@
         dest: "/tmp/hosts-from-controller"
         mode: 0700
 
-    - name: "Include tool.bootstrap_ssl_files_files"
+    - name: "Include tool.bootstrap_ssl_files"
       tags:
-        - "tool.bootstrap_ssl_files_files"
+        - "tool.bootstrap_ssl_files"
       vars:
         bootstrap_ssl_files_user: "{{ inv_bootstrap_ssl_files_user }}"
         bootstrap_ssl_files_base_path: "{{ inv_bootstrap_ssl_files_base_path }}"
@@ -22,4 +22,4 @@
         bootstrap_ssl_files_end_certs: "{{ inv_bootstrap_ssl_files_end_certs }}"
         bootstrap_ssl_files_cert_validity: "{{ inv_bootstrap_ssl_files_cert_validity }}"
       ansible.builtin.include_role:
-        name: "tool.bootstrap_ssl_files_files"
+        name: "tool.bootstrap_ssl_files"

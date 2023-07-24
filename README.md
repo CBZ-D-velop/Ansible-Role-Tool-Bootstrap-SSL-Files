@@ -1,4 +1,4 @@
-# Ansible role: tool.bootstrap_ssl_files_files
+# Ansible role: tool.bootstrap_ssl_files
 
 ![Licence Status](https://img.shields.io/badge/licence-MIT-brightgreen)
 ![CI Status](https://img.shields.io/badge/CI-success-brightgreen)
@@ -314,9 +314,9 @@ inv_bootstrap_ssl_files_end_certs:
 To run this role, you can copy the molecule/default/converge.yml playbook and add it into your playbook:
 
 ```YAML
-- name: "Include tool.bootstrap_ssl_files_files"
+- name: "Include tool.bootstrap_ssl_files"
   tags:
-    - "tool.bootstrap_ssl_files_files"
+    - "tool.bootstrap_ssl_files"
   vars:
     bootstrap_ssl_files_user: "{{ inv_bootstrap_ssl_files_user }}"
     bootstrap_ssl_files_base_path: "{{ inv_bootstrap_ssl_files_base_path }}"
@@ -327,7 +327,7 @@ To run this role, you can copy the molecule/default/converge.yml playbook and ad
     bootstrap_ssl_files_end_certs: "{{ inv_bootstrap_ssl_files_end_certs }}"
     bootstrap_ssl_files_cert_validity: "{{ inv_bootstrap_ssl_files_cert_validity }}"
   ansible.builtin.include_role:
-    name: "tool.bootstrap_ssl_files_files"
+    name: "tool.bootstrap_ssl_files"
 ```
 
 ## Architectural Decisions Records

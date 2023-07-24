@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Lord Robin Crombez"
   namespace: "tool"
-  role_name: "bootstrap_ssl_files_files"
+  role_name: "bootstrap_ssl_files"
   description: "An Ansible role create a list of defined files related to SSL/TLS"
   company: "CBZ D-velop"
 
