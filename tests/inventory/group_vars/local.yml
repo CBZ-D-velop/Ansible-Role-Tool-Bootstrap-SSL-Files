@@ -81,3 +81,16 @@ inv_bootstrap_ssl_files_end_certs:
       - "localhost"
       - "my-website.tld"
     certification_ca: "My Local Ansible Intermediate CA 2"
+
+  #- cn: "my-end-certificate-3.domain.tld"
+  #  c: "FR"
+  #  st: "state"
+  #  l: "city"
+  #  o: "Local Ansible"
+  #  ou: "Local Dev IT"
+  #  email_address: "contact@your.domain.tld"
+  #  alternatives:
+  #    - "127.0.0.1"
+  #    - "localhost"
+  #    - "my-website.tld"
+  #  certification_ca: "My Local Ansible Intermediate CA 2"

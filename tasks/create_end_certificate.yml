@@ -20,14 +20,11 @@
     ca_chains_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/ca-chain.pem.crt"
     bundle_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/bundles/{{ certificate.cn | replace(' ', '-') }}"
 
-- name: "create_end_certificate | Check if destination exist for certificate {{ certificate.cn }}"
-  register: bundle_path_stat
-  ansible.builtin.stat:
-    path: "{{ bundle_path }}"
-
 - name: "create_end_certificate | Create certificate {{ certificate.cn }}"
-  when: not bundle_path_stat.stat.exists
   block:
+    - name: "create_end_certificate | Send to the revokator"
+      ansible.builtin.include_tasks:
+        file: "revoke_certificate.yml"
 
     - name: "create_end_certificate | Create a KEY of {{ bootstrap_ssl_files_key_size }} for certificate {{ certificate.cn }}"
       register: output
