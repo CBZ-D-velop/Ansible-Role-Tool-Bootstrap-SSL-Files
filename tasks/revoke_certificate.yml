@@ -1,0 +1,24 @@
+---
+- name: "revoke_certificate | Check if revokation is required for cert {{ certificate.cn }}"
+  register: cert_path_stat
+  ansible.builtin.stat:
+    path: "{{ cert_path }}"
+
+- name: "revoke_certificate | Revokation is required for cert {{ certificate.cn }}"
+  when: cert_path_stat.stat.exists
+  block:
+    - name: "create_end_certificate | Set facts"
+      failed_when: not (root_ca | default(false))
+      ansible.builtin.set_fact:
+        crl_path: "{{ root_ca_path }}/crl/{{ root_ca_name }}.pem.crl"
+
+    - name: "Revoke the certificate"
+      register: output
+      changed_when: output.rc >= 2
+      failed_when: output.rc >= 2
+      ansible.builtin.command: "openssl ca -config {{ req_path }} -revoke {{ cert_path }} -passin pass:'{{ root_ca.password }}' -batch"
+
+    - name: "Update the CRL for cert {{ certificate.cn }}"
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.command: "openssl ca -config {{ req_path }} -gencrl -out {{ crl_path }} -passin pass:'{{ root_ca.password }}' -batch"
