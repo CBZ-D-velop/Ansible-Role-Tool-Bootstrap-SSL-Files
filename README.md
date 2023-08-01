@@ -301,6 +301,18 @@ inv_bootstrap_ssl_files_end_certs:
       - "my-website.tld"
     certification_ca: "My Local Ansible Intermediate CA 2"
 
+  #- cn: "my-end-certificate-3.domain.tld"
+  #  c: "FR"
+  #  st: "state"
+  #  l: "city"
+  #  o: "Local Ansible"
+  #  ou: "Local Dev IT"
+  #  email_address: "contact@your.domain.tld"
+  #  alternatives:
+  #    - "127.0.0.1"
+  #    - "localhost"
+  #    - "my-website.tld"
+  #  certification_ca: "My Local Ansible Intermediate CA 2"
 ```
 
 ```YAML
@@ -374,6 +386,10 @@ Here you can put your change to keep a trace of your work and decisions.
 * CAs keys are password protected
 * To deploy a cert, you have the ca-chain.pem.crt, that contains all cert of the structure for that cert
 * Revocation system not implemented
+
+### 2023-07-23: Revoke cert
+
+* Role handle the revocation of certs if exist
 
 ## Authors
 
