@@ -146,6 +146,7 @@ bootstrap_ssl_files_root_ca:
   ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
   password: "m3EH3A56h5mNY"
+  ca_password: "m3EH3A56h5mNY"
 
 bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
@@ -155,7 +156,8 @@ bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 1"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56h5mNY"
+    ca_password: "m3EH3A56h5mNY"
+    password: "jdieldodkiekie"
     certification_ca: "My Local Ansible Root CA"
 
   - cn: "My Local Ansible Intermediate CA 2"
@@ -165,7 +167,8 @@ bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 2"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56*ùph5mNY"
+    ca_password: "jdieldodkiekie"
+    password: "kdidkodkdokldkdokeok"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
 bootstrap_ssl_files_end_certs:
@@ -208,6 +211,7 @@ bootstrap_ssl_files_end_certs:
       - "my-website.tld"
     certification_ca: "My Local Ansible Intermediate CA 2"
 
+
 ```
 
 The best way is to modify these vars by copy the ./default/main.yml file into the ./vars and edit with your personnals requirements.
@@ -239,6 +243,7 @@ inv_bootstrap_ssl_files_root_ca:
   ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
   password: "m3EH3A56h5mNY"
+  ca_password: "m3EH3A56h5mNY"
 
 inv_bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
@@ -248,7 +253,8 @@ inv_bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 1"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56h5mNY"
+    ca_password: "m3EH3A56h5mNY"
+    password: "jdieldodkiekie"
     certification_ca: "My Local Ansible Root CA"
 
   - cn: "My Local Ansible Intermediate CA 2"
@@ -258,7 +264,8 @@ inv_bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 2"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56*ùph5mNY"
+    ca_password: "jdieldodkiekie"
+    password: "kdidkodkdokldkdokeok"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
 inv_bootstrap_ssl_files_end_certs:
@@ -301,18 +308,6 @@ inv_bootstrap_ssl_files_end_certs:
       - "my-website.tld"
     certification_ca: "My Local Ansible Intermediate CA 2"
 
-  #- cn: "my-end-certificate-3.domain.tld"
-  #  c: "FR"
-  #  st: "state"
-  #  l: "city"
-  #  o: "Local Ansible"
-  #  ou: "Local Dev IT"
-  #  email_address: "contact@your.domain.tld"
-  #  alternatives:
-  #    - "127.0.0.1"
-  #    - "localhost"
-  #    - "my-website.tld"
-  #  certification_ca: "My Local Ansible Intermediate CA 2"
 ```
 
 ```YAML
