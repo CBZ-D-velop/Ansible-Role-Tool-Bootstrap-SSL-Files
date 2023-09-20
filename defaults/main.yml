@@ -29,6 +29,7 @@ bootstrap_ssl_files_root_ca:
   ou: "My Local Ansible Root CA"
   email_address: "contact@your.domain.tld"
   password: "m3EH3A56h5mNY"
+  ca_password: "m3EH3A56h5mNY"
 
 bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
@@ -38,7 +39,8 @@ bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 1"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56h5mNY"
+    ca_password: "m3EH3A56h5mNY"
+    password: "jdieldodkiekie"
     certification_ca: "My Local Ansible Root CA"
 
   - cn: "My Local Ansible Intermediate CA 2"
@@ -48,7 +50,8 @@ bootstrap_ssl_files_intermediates_ca:
     o: "Local Ansible"
     ou: "My Local Ansible Intermediate CA 2"
     email_address: "contact@your.domain.tld"
-    password: "m3EH3A56*ùph5mNY"
+    ca_password: "jdieldodkiekie"
+    password: "kdidkodkdokldkdokeok"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
 bootstrap_ssl_files_end_certs:
