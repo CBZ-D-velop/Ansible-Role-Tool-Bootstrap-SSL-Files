@@ -71,17 +71,17 @@
     - name: "create_intermediate_ca | Create a KEY of {{ bootstrap_ssl_files_key_size }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "openssl genrsa -aes256 -passout pass:'{{ intermediate_ca.password }}' -out {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key {{ bootstrap_ssl_files_key_size }}"
+      ansible.builtin.command: "openssl genrsa -aes256 -passout pass:'{{ intermediate_ca.password }}' -out {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key {{ bootstrap_ssl_files_key_size }}"
 
     - name: "create_intermediate_ca | Create a CSR"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "openssl req -config {{ intermediate_ca_path }}/openssl.cnf -key {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key -new -sha256 -out {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -passin pass:'{{ intermediate_ca.password }}' -subj \"/C={{ intermediate_ca.c }}/ST={{ intermediate_ca.st }}/L={{ intermediate_ca.l }}/O={{ intermediate_ca.o }}/OU={{ intermediate_ca.ou }}/emailAddress={{ intermediate_ca.email_address }}/CN={{ intermediate_ca_name }}\""
+      ansible.builtin.command: "openssl req -config {{ intermediate_ca_path }}/openssl.cnf -key {{ intermediate_ca_path }}/private/{{ intermediate_ca_name }}.pem.key -new -sha256 -out {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -passin pass:'{{ intermediate_ca.password }}' -subj \"/C={{ intermediate_ca.c }}/ST={{ intermediate_ca.st }}/L={{ intermediate_ca.l }}/O={{ intermediate_ca.o }}/OU={{ intermediate_ca.ou }}/emailAddress={{ intermediate_ca.email_address }}/CN={{ intermediate_ca_name }}\""
 
     - name: "create_intermediate_ca | Create a CRT (sign CSR)"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.shell: "openssl ca -config {{ root_ca_path }}/openssl.cnf -extensions v3_intermediate_ca -days {{ bootstrap_ssl_files_ca_validity }} -notext -md sha256 -in {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -out {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt -passin pass:'{{ intermediate_ca.ca_password }}' -batch"
+      ansible.builtin.command: "openssl ca -config {{ root_ca_path }}/openssl.cnf -extensions v3_intermediate_ca -days {{ bootstrap_ssl_files_ca_validity }} -notext -md sha256 -in {{ intermediate_ca_path }}/csr/{{ intermediate_ca_name }}.pem.csr -out {{ intermediate_ca_path }}/certs/{{ intermediate_ca_name }}.pem.crt -passin pass:'{{ intermediate_ca.ca_password }}' -batch"
 
     - name: "create_intermediate_ca | Create a ca-chain.pem.crt"
       register: output
