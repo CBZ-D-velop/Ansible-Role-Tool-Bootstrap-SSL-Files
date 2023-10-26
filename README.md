@@ -137,7 +137,7 @@ bootstrap_ssl_files_dirs:
   - "bundles"
 
 # SSL/TLS informations
-bootstrap_ssl_files_root_ca:
+inv_bootstrap_ssl_files_root_ca:
   cn: "My Local Ansible Root CA"
   c: "FR"
   st: "state"
@@ -148,7 +148,7 @@ bootstrap_ssl_files_root_ca:
   password: "m3EH3A56h5mNY"
   ca_password: "m3EH3A56h5mNY"
 
-bootstrap_ssl_files_intermediates_ca:
+inv_bootstrap_ssl_files_intermediates_ca:
   - cn: "My Local Ansible Intermediate CA 1"
     c: "FR"
     st: "state"
@@ -210,7 +210,6 @@ bootstrap_ssl_files_end_certs:
       - "localhost"
       - "my-website.tld"
     certification_ca: "My Local Ansible Intermediate CA 2"
-
 
 ```
 
