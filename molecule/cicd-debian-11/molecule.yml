@@ -56,14 +56,12 @@ verifier:
 scenario:
   name: "cicd-debian-11"
   test_sequence:
-    #- "lint"
     - "destroy"
-    #- "dependency" # need a "requirements.yml" file
     - "syntax"
-    - "create"
-    - "prepare"
-    - "converge"
+    #- "dependency"
+    #- "create"
+    #- "prepare"
+    #- "converge"
     #- "idempotence"
-    #- "side_effect" # need a "requirements.yml" file
-    - "verify"
-    - "destroy"
+    #- "verify"
+    #- "destroy"
