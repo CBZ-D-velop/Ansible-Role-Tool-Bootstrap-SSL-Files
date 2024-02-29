@@ -392,6 +392,12 @@ Here you can put your change to keep a trace of your work and decisions.
 * Molecule now use custom Docker image in CI/CD by env vars
 * New CICD with needs and optimization
 
+### 2024-02-29: New CI
+
+* Added new CI
+* Added SonarQube
+* Refact vars
+
 ## Authors
 
 * Lord Robin Crombez
