@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     root_ca: "{{ CA }}"
   when: CA.cn == certificate.certification_ca
-  loop: "{{ [bootstrap_ssl_files_root_ca] + bootstrap_ssl_files_intermediates_ca }}"
+  loop: "{{ [bootstrap_ssl_files__root_ca] + bootstrap_ssl_files__intermediates_ca }}"
   loop_control:
     loop_var: CA
 
@@ -11,14 +11,14 @@
   failed_when: not (root_ca | default(false))
   ansible.builtin.set_fact:
     root_ca_name: "{{ root_ca.cn | replace(' ', '-') }}"
-    root_ca_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
+    root_ca_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}"
     certificate_name: "{{ certificate.cn | replace(' ', '-') }}"
-    cert_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/{{ certificate.cn | replace(' ', '-') }}.pem.crt"
-    key_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/private/{{ certificate.cn | replace(' ', '-') }}.pem.key"
-    req_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/req/{{ certificate.cn | replace(' ', '-') }}.req"
-    csr_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/csr/{{ certificate.cn | replace(' ', '-') }}.pem.csr"
-    ca_chains_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/ca-chain.pem.crt"
-    bundle_path: "{{ bootstrap_ssl_files_base_path }}/{{ root_ca.cn | replace(' ', '-') }}/bundles/{{ certificate.cn | replace(' ', '-') }}"
+    cert_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/{{ certificate.cn | replace(' ', '-') }}.pem.crt"
+    key_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/private/{{ certificate.cn | replace(' ', '-') }}.pem.key"
+    req_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/req/{{ certificate.cn | replace(' ', '-') }}.req"
+    csr_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/csr/{{ certificate.cn | replace(' ', '-') }}.pem.csr"
+    ca_chains_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/certs/ca-chain.pem.crt"
+    bundle_path: "{{ bootstrap_ssl_files__base_path }}/{{ root_ca.cn | replace(' ', '-') }}/bundles/{{ certificate.cn | replace(' ', '-') }}"
 
 - name: "create_end_certificate | Create certificate {{ certificate.cn }}"
   block:
@@ -26,10 +26,10 @@
       ansible.builtin.include_tasks:
         file: "revoke_certificate.yml"
 
-    - name: "create_end_certificate | Create a KEY of {{ bootstrap_ssl_files_key_size }} for certificate {{ certificate.cn }}"
+    - name: "create_end_certificate | Create a KEY for certificate {{ certificate.cn }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl genrsa -out {{ key_path }} {{ bootstrap_ssl_files_key_size }}"
+      ansible.builtin.command: "openssl genrsa -out {{ key_path }} {{ bootstrap_ssl_files__key_size }}"
 
     - name: "create_end_certificate | Create CSR file"
       block:
@@ -39,8 +39,8 @@
           ansible.builtin.template:
             src: templates/request.j2
             dest: "{{ req_path }}"
-            owner: "{{ bootstrap_ssl_files_user }}"
-            group: "{{ bootstrap_ssl_files_user }}"
+            owner: "{{ bootstrap_ssl_files__user }}"
+            group: "{{ bootstrap_ssl_files__user }}"
             mode: "0700"
 
         - name: "create_end_certificate | Create CSR with REQ file for certificate {{ certificate.cn }}"
@@ -51,14 +51,14 @@
     - name: "create_end_certificate | Create a CRT (sign CSR) for certificate {{ certificate.cn }}"
       register: output
       changed_when: output.rc != 0
-      ansible.builtin.command: "openssl ca -config {{ req_path }} -extensions server_cert -days {{ bootstrap_ssl_files_cert_validity }} -notext -md sha256 -in {{ csr_path }} -out {{ cert_path }} -passin pass:'{{ root_ca.password }}' -batch"
+      ansible.builtin.command: "openssl ca -config {{ req_path }} -extensions server_cert -days {{ bootstrap_ssl_files__cert_validity }} -notext -md sha256 -in {{ csr_path }} -out {{ cert_path }} -passin pass:'{{ root_ca.password }}' -batch"
 
     - name: "create_end_certificate | Import ca-chain.pem.crt for certificate {{ certificate.cn }}"
       ansible.builtin.copy:
         src: "{{ root_ca_path }}/certs/ca-chain.pem.crt"
         dest: "{{ ca_chains_path }}"
-        owner: "{{ bootstrap_ssl_files_user }}"
-        group: "{{ bootstrap_ssl_files_user }}"
+        owner: "{{ bootstrap_ssl_files__user }}"
+        group: "{{ bootstrap_ssl_files__user }}"
         mode: "0700"
         remote_src: yes
 
@@ -69,8 +69,8 @@
         path: "{{ bundle_path }}"
         state: directory
         recurse: yes
-        owner: "{{ bootstrap_ssl_files_user }}"
-        group: "{{ bootstrap_ssl_files_user }}"
+        owner: "{{ bootstrap_ssl_files__user }}"
+        group: "{{ bootstrap_ssl_files__user }}"
         mode: "0700"
 
     - name: "create_end_certificate | Import files in bundle for certificate {{ certificate.cn }}"
@@ -85,8 +85,8 @@
       ansible.builtin.copy:
         src: "{{ file.src }}"
         dest: "{{ file.dest }}"
-        owner: "{{ bootstrap_ssl_files_user }}"
-        group: "{{ bootstrap_ssl_files_user }}"
+        owner: "{{ bootstrap_ssl_files__user }}"
+        group: "{{ bootstrap_ssl_files__user }}"
         mode: "0700"
         remote_src: yes
 
@@ -97,6 +97,6 @@
         path: "{{ bundle_path }}"
         dest: "{{ bundle_path }}.zip"
         format: zip
-        owner: "{{ bootstrap_ssl_files_user }}"
-        group: "{{ bootstrap_ssl_files_user }}"
+        owner: "{{ bootstrap_ssl_files__user }}"
+        group: "{{ bootstrap_ssl_files__user }}"
         mode: "0700"
