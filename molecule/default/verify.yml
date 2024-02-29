@@ -2,7 +2,7 @@
 # Don't forget to keep this file updated
 # molecule/<scenario>/verify.yml
 - name: "Verify"
-  hosts: "all"
+  hosts: "local"
   gather_facts: false
   tasks:
 
@@ -10,8 +10,8 @@
     block:
     - name: "Set facts"
       ansible.builtin.set_fact:
-        root_ca_name: "{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
-        root_ca_path: "{{ inv_bootstrap_ssl_files_base_path }}/{{ inv_bootstrap_ssl_files_root_ca.cn | replace(' ', '-') }}"
+        root_ca_name: "{{ inv_bootstrap_ssl_files__root_ca.cn | replace(' ', '-') }}"
+        root_ca_path: "{{ inv_bootstrap_ssl_files__base_path }}/{{ inv_bootstrap_ssl_files__root_ca.cn | replace(' ', '-') }}"
 
     - name: "Verify"
       register: output
@@ -19,14 +19,14 @@
       ansible.builtin.command: "openssl verify -CAfile {{ root_ca_path }}/certs/ca-chain.pem.crt {{ root_ca_path }}/certs/ca-chain.pem.crt"
 
   - name: "Verify Intermediate CA"
-    loop: "{{ inv_bootstrap_ssl_files_intermediates_ca }}"
+    loop: "{{ inv_bootstrap_ssl_files__intermediates_ca }}"
     loop_control:
       loop_var: intermediate_ca
     ansible.builtin.include_tasks:
       file: "tasks/verify_intermediate_ca.yml"
 
   - name: "Verify Intermediate CA"
-    loop: "{{ inv_bootstrap_ssl_files_end_certs }}"
+    loop: "{{ inv_bootstrap_ssl_files__end_certs }}"
     loop_control:
       loop_var: certificate
     ansible.builtin.include_tasks:

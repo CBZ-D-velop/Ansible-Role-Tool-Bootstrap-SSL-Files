@@ -1,23 +1,14 @@
 ---
 # The current user and group to create files
-bootstrap_ssl_files__user: "root"
+inv_bootstrap_ssl_files__user: "root"
 # The base path on where you want your certs files
-bootstrap_ssl_files__base_path: "/root/ssl"
+inv_bootstrap_ssl_files__base_path: "/tmp/ssl/MyPKI"
 # The validity of your certs files
-bootstrap_ssl_files__ca_validity: 3650
-bootstrap_ssl_files__cert_validity: 365
+inv_bootstrap_ssl_files__ca_validity: 3650
+inv_bootstrap_ssl_files__cert_validity: 90
 # The size of your key
-bootstrap_ssl_files__key_size: 4096
-
-bootstrap_ssl_files__serial_start: 1000
-bootstrap_ssl_files__dirs:
-  - "certs"
-  - "crl"
-  - "newcerts"
-  - "private"
-  - "csr"
-  - "req"
-  - "bundles"
+inv_bootstrap_ssl_files__key_size: 4096
+# Files wanted and where you want them
 
 # SSL/TLS informations
 inv_bootstrap_ssl_files__root_ca:
@@ -54,7 +45,7 @@ inv_bootstrap_ssl_files__intermediates_ca:
     password: "kdidkodkdokldkdokeok"
     certification_ca: "My Local Ansible Intermediate CA 1"
 
-bootstrap_ssl_files__end_certs:
+inv_bootstrap_ssl_files__end_certs:
   - cn: "my-end-certificate-1.domain.tld"
     c: "FR"
     st: "state"

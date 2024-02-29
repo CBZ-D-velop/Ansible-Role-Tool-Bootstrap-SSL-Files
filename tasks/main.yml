@@ -4,19 +4,19 @@
   block:
     - name: "Create ROOT CA Authority"
       vars:
-        root_ca: "{{ bootstrap_ssl_files_root_ca }}"
+        root_ca: "{{ bootstrap_ssl_files__root_ca }}"
       ansible.builtin.include_tasks:
         file: "create_root_ca.yml"
 
     - name: "Create INTERMEDIATE CA Authorities"
-      loop: "{{ bootstrap_ssl_files_intermediates_ca }}"
+      loop: "{{ bootstrap_ssl_files__intermediates_ca }}"
       loop_control:
         loop_var: intermediate_ca
       ansible.builtin.include_tasks:
         file: "create_intermediate_ca.yml"
 
     - name: "Create certificates"
-      loop: "{{ bootstrap_ssl_files_end_certs }}"
+      loop: "{{ bootstrap_ssl_files__end_certs }}"
       loop_control:
         loop_var: certificate
       ansible.builtin.include_tasks:
