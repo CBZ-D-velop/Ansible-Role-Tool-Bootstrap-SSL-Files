@@ -3,13 +3,17 @@
   hosts: "cicd-debian-12"
   tasks:
 
-    - name: "Include labocbz.prepare_host"
+    - name: "Include tool.bootstrap_ssl_files"
       tags:
-        - "labocbz.prepare_host"
+        - "tool.bootstrap_ssl_files"
       vars:
-        prepare_host__users: "{{ inv_prepare_host__users }}"
-        prepare_host__packages_removed: "{{ inv_prepare_host__packages_removed }}"
-        prepare_host__packages_installed: "{{ inv_prepare_host__packages_installed }}"
-        prepare_host__system_users: "{{ inv_prepare_host__system_users }}"
+        bootstrap_ssl_files__user: "{{ inv_bootstrap_ssl_files__user }}"
+        bootstrap_ssl_files__base_path: "{{ inv_bootstrap_ssl_files__base_path }}"
+        bootstrap_ssl_files__ca_validity: "{{ inv_bootstrap_ssl_files__ca_validity }}"
+        bootstrap_ssl_files__key_size: "{{ inv_bootstrap_ssl_files__key_size }}"
+        bootstrap_ssl_files__root_ca: "{{ inv_bootstrap_ssl_files__root_ca }}"
+        bootstrap_ssl_files__intermediates_ca: "{{ inv_bootstrap_ssl_files__intermediates_ca }}"
+        bootstrap_ssl_files__end_certs: "{{ inv_bootstrap_ssl_files__end_certs }}"
+        bootstrap_ssl_files__cert_validity: "{{ inv_bootstrap_ssl_files__cert_validity }}"
       ansible.builtin.include_role:
-        name: "labocbz.prepare_host"
+        name: "tool.bootstrap_ssl_files"
