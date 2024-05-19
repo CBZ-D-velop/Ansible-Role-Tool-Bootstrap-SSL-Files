@@ -9,7 +9,7 @@ driver:
 
 platforms:
   - name: "molecule-local-instance-1-bootstrap-ssl-files"
-    image: "robincbz/debian-11-ansible:latest"
+    image: "labocbz/ansibletest-debian-11:latest"
     #published_ports:
     #  - "0.0.0.0:8181:8181/tcp"
     privileged: true
@@ -35,7 +35,7 @@ provisioner:
       host_vars: "../../tests/inventory/host_vars/"
   options:
     extra-vars: "@./../../tests/tower/tower.yml"
-  log: ${MOLECULE_ANSIBLE_LOG:-true}
+  log: true
   env:
     ANSIBLE_CONFIG: "../../.ansible.cfg"
     ANSIBLE_FORCE_COLOR: "True"
